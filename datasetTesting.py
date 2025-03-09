@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import cv2
+from keras import Input
 from sklearn.model_selection import train_test_split
 
 Sequential = tf.keras.models.Sequential
@@ -13,7 +14,7 @@ Dense = tf.keras.layers.Dense
 
 
 IMG_SIZE=128 #resize images
-DATA_DIRECTORY = "data/"
+DATA_DIRECTORY = "/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet/data/dataset-resized"
 
 CATEGORIES = ["cardboard", "glass", "metal", "paper", "plastic", "trash"]
 
@@ -35,32 +36,37 @@ def load_data():
     # returns a pair of images with their corresponding labels
     return np.array(images),np.array(labels)
 
+# IMPORTANT: COMMENT OUT CODE WHEN MODEL IS FINISHED LOADING
+# ims, ls = load_data()
 
-# def predict_image(image_path):
-#     img = cv2.imread(image_path)
-#     img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-#     img = img / 255.0
-#     img = np.expand_dims(img, axis=0)  # add batch dimension
+# model = Sequential([
+#     Input(shape=(IMG_SIZE,IMG_SIZE,3)),
+#     Conv2D(32,(3,3),activation='relu',input_shape=(IMG_SIZE,IMG_SIZE,3)), # filter of size 3x3 continuously moving
+#     MaxPooling2D(pool_size=(2,2)), # better efficiency
+#     Conv2D(64,(3,3),activation='relu'), # 32 -> 64 for more complex patterns
+#     MaxPooling2D(pool_size=(2,2)),
+#     Flatten(), # converts 2D -> 1D
+#     Dense(128,activation='relu'),
+#     Dense(len(CATEGORIES),activation='softmax')
+# ])
+
+# model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+# model.summary()
+# X_train, X_test, y_train, y_test = train_test_split(ims, ls, test_size=0.2, random_state=42)
 #
-#     prediction = model.predict(img)
-#     class_idx = np.argmax(prediction)
-#     return CATEGORIES[class_idx]
+# model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
+# model.save("trashnet_model.h5")
+MODEL_PATH = "/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet_model.h5"
+model = tf.keras.models.load_model(MODEL_PATH)
 
-ims, ls = load_data()
+def predict_image(image_path):
+    img = cv2.imread(image_path)
+    img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+    img = img / 255.0
+    img = np.expand_dims(img, axis=0)  # add batch dimension
 
-model = Sequential(
-    Conv2D(32,(3,3),activation='relu',input_shape=(IMG_SIZE,IMG_SIZE,3)), # filter of size 3x3 continuously moving
-    MaxPooling2D(pool_size=(2,2)), # better efficiency
-    Conv2D(64,(3,3),activation='relu'), # 32 -> 64 for more complex patterns
-    MaxPooling2D(pool_size=(2,2)), # better effiency again
-    Flatten(), # converts 2D ->  1D
-    Dense(128,activation='relu'), # create
-    Dense(len(CATEGORIES),activation='softmax')
-)
+    prediction = model.predict(img)
+    class_idx = np.argmax(prediction)
+    return CATEGORIES[class_idx]
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.summary()
-X_train, X_test, y_train, y_test = train_test_split(ims, ls, test_size=0.2, random_state=42)
-
-model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
-model.save("trashnet_model.h5")
+print(predict_image("/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet/data/Wad-of-trash.jpg"))
