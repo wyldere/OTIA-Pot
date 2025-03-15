@@ -17,7 +17,7 @@ IMG_SIZE=128 #resize images
 DATA_DIRECTORY = "/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet/data/dataset-resized"
 
 CATEGORIES = ["cardboard", "glass", "metal", "paper", "plastic", "trash"]
-
+#
 def load_data():
     images,labels=[],[]
 
@@ -37,25 +37,25 @@ def load_data():
     return np.array(images),np.array(labels)
 
 # IMPORTANT: COMMENT OUT CODE WHEN MODEL IS FINISHED LOADING
-# ims, ls = load_data()
+ims, ls = load_data()
 
-# model = Sequential([
-#     Input(shape=(IMG_SIZE,IMG_SIZE,3)),
-#     Conv2D(32,(3,3),activation='relu',input_shape=(IMG_SIZE,IMG_SIZE,3)), # filter of size 3x3 continuously moving
-#     MaxPooling2D(pool_size=(2,2)), # better efficiency
-#     Conv2D(64,(3,3),activation='relu'), # 32 -> 64 for more complex patterns
-#     MaxPooling2D(pool_size=(2,2)),
-#     Flatten(), # converts 2D -> 1D
-#     Dense(128,activation='relu'),
-#     Dense(len(CATEGORIES),activation='softmax')
-# ])
+model = Sequential([
+    Input(shape=(IMG_SIZE,IMG_SIZE,3)),
+    Conv2D(32,(3,3),activation='relu',input_shape=(IMG_SIZE,IMG_SIZE,3)), # filter of size 3x3 continuously moving
+    MaxPooling2D(pool_size=(2,2)), # better efficiency
+    Conv2D(64,(3,3),activation='relu'), # 32 -> 64 for more complex patterns
+    MaxPooling2D(pool_size=(2,2)),
+    Flatten(), # converts 2D -> 1D
+    Dense(128,activation='relu'),
+    Dense(len(CATEGORIES),activation='softmax')
+])
 
-# model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-# model.summary()
-# X_train, X_test, y_train, y_test = train_test_split(ims, ls, test_size=0.2, random_state=42)
-#
-# model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
-# model.save("trashnet_model.h5")
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.summary()
+X_train, X_test, y_train, y_test = train_test_split(ims, ls, test_size=0.2, random_state=42)
+
+model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
+model.save("trashnet_model.h5")
 MODEL_PATH = "/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet_model.h5"
 model = tf.keras.models.load_model(MODEL_PATH)
 
@@ -68,5 +68,9 @@ def predict_image(image_path):
     prediction = model.predict(img)
     class_idx = np.argmax(prediction)
     return CATEGORIES[class_idx]
-
-print(predict_image("/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet/data/Wad-of-trash.jpg"))
+print("File exists:", os.path.exists("/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet/data/dataset-resized/trash/trash138.jpg"))
+category = predict_image("/Users/jessevguo/PycharmProjects/OTIA-Pot/trashnet/data/dataset-resized/trash/trash138.jpg")
+if category == "paper" or category == "plastic" or category or "cardboard" or category == "glass":
+    print("recycleable")
+else:
+    print("trash")
