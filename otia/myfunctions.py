@@ -31,7 +31,6 @@ def load_data(DATA_DIRECTORY, CATEGORIES, IMG_SIZE):
 
 def predict_image(image_path, model_path, IMG_SIZE, CATEGORIES):
     model = tf.keras.models.load_model(model_path)
-    model.load(model_path)
     img = cv2.imread(image_path)
     img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
     img = img / 255.0
